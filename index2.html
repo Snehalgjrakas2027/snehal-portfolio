@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Snehal Rakas — Portfolio (Spotify-style)</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body,#app{height:100%}
+  body{
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:#121212;color:#e6e6e6;line-height:1.35;
+  }
+  .app{display:flex;min-height:100vh}
+  .sidebar{
+    width:240px;background:#050505; padding:22px 14px;border-right:1px solid rgba(255,255,255,0.03);
+    display:flex;flex-direction:column;gap:18px;
+  }
+  .logo{display:flex;align-items:center;gap:12px;padding:6px 8px;border-radius:8px;}
+  .brand-name{font-weight:700;font-size:16px;color:#fff}
+  .nav-links{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+  .nav-links a{display:flex;align-items:center;gap:12px;padding:10px;border-radius:8px;color:rgba(255,255,255,0.85);text-decoration:none;cursor:pointer}
+  .nav-links a:hover{background:rgba(255,255,255,0.03)}
+  .playlists{margin-top:auto;font-size:13px;color:#9b9b9b}
+  .main{flex:1;display:flex;flex-direction:column}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid rgba(255,255,255,0.03)}
+  .search{display:flex;align-items:center;gap:10px;background:#0f0f0f;padding:8px 12px;border-radius:20px;width:420px}
+  .search input{background:transparent;border:0;outline:none;color:#ddd;width:100%}
+  .profile{display:flex;align-items:center;gap:10px}
+  .profile img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.06)}
+  .profile-actions{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+  .profile-actions a{font-size:12px;color:#9b9b9b;text-decoration:none}
+  .content{padding:20px 28px;display:flex;gap:20px;flex:1;overflow:auto}
+  .left-col{width:360px;display:flex;flex-direction:column;gap:18px}
+  .playlist-card{background:linear-gradient(135deg, rgba(29,185,84,0.06), rgba(255,255,255,0.01));padding:16px;border-radius:12px;display:flex;gap:12px;align-items:center;cursor:pointer}
+  .playlist-art{width:80px;height:80px;border-radius:8px;background:#0b0b0b;display:flex;align-items:center;justify-content:center}
+  .playlist-meta h3{color:#fff;font-size:18px;margin-bottom:6px}
+  .right-col{flex:1;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0));padding:18px;border-radius:12px}
+  .tracks-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .track-list{background:transparent;border-radius:8px;padding-top:8px}
+  .track{display:flex;gap:12px;align-items:center;padding:10px;border-radius:8px;color:#dcdcdc;cursor:pointer}
+  .track:hover{background:rgba(255,255,255,0.02)}
+  .track .idx{width:28px;text-align:center;color:#9e9e9e}
+  .track .thumb{width:64px;height:64px;border-radius:6px;background:#111;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .track .meta{flex:1}
+  .track .meta h4{font-size:15px;color:#fff}
+  .track .meta p{font-size:13px;color:#a7a7a7;margin-top:6px}
+  .tech-badges{display:flex;gap:6px;margin-top:8px}
+  .badge{font-size:12px;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);color:#cfcfcf}
+  #overlay{position:fixed;right:0;top:0;height:100vh;width:560px;background:#0f0f0f;border-left:1px solid rgba(255,255,255,0.03);transform:translateX(100%);transition:transform .28s cubic-bezier(.22,.9,.29,1);z-index:60;padding:22px;display:flex;flex-direction:column;gap:12px}
+  #overlay.open{transform:translateX(0)}
+  .btn{background:#1DB954;border:none;color:#011; padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer}
+  .btn.outline{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#ddd}
+  .nowbar{position:fixed;left:240px;right:0;bottom:0;height:72px;background:linear-gradient(90deg, rgba(0,0,0,0.65), rgba(0,0,0,0.5));display:flex;align-items:center;padding:10px 24px;gap:12px;border-top:1px solid rgba(255,255,255,0.03)}
+  .now-cover{width:52px;height:52px;border-radius:6px;overflow:hidden;background:#222}
+  .now-meta{flex:1;display:flex;flex-direction:column;gap:4px}
+  .now-meta h5{font-size:14px;color:#fff}
+  .now-meta p{font-size:12px;color:#bdbdbd}
+
+  /* Certifications page styles (podcast-like) */
+  .cert-hero{height:220px;border-radius:12px;background:linear-gradient(90deg,#0b6b4d,#0f4b36);display:flex;align-items:center;padding:28px;color:#fff;margin-bottom:18px}
+  .cert-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+  .cert-card-large{background:#0b0b0b;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px}
+  .cert-card-large img{width:100%;height:140px;object-fit:cover;border-radius:8px}
+  .cert-card-large .meta{display:flex;flex-direction:column;gap:6px}
+  .cert-card-large .meta b{font-weight:700;color:#fff}
+  .cert-card-large .meta span{font-size:13px;color:#cfcfcf}
+  .cert-actions{display:flex;gap:8px;margin-top:8px}
+
+  /* Artist / About optimised */
+  .artist-cover{
+    height:140px;
+    border-radius:12px;
+    background-size:cover;
+    background-position:center;
+    position:relative;
+    display:flex;
+    align-items:flex-end;
+    padding:18px 28px;
+    overflow:visible;
+    background-color:#0b0b0b;
+  }
+  .artist-photo{
+    width:160px;
+    height:160px;
+    border-radius:50%;
+    overflow:hidden;
+    border:8px solid rgba(0,0,0,0.6);
+    box-shadow:0 14px 40px rgba(0,0,0,0.6);
+    margin-top:-80px;
+    background:#111;
+    flex-shrink:0;
+  }
+  .artist-photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    /* default face centering — tweak if needed */
+    object-position:50% 35%;
+    image-rendering:auto;
+    display:block;
+  }
+
+  @media (max-width:900px){
+    .sidebar{display:none}
+    .nowbar{left:0}
+    .app{flex-direction:column}
+    .artist-cover{height:110px;padding:12px;}
+    .artist-photo{width:120px;height:120px;margin-top:-60px;}
+  }
+</style>
+</head>
+<body>
+<div id="app" class="app" aria-live="polite">
+  <aside class="sidebar" aria-label="Sidebar">
+    <div class="logo" role="img" aria-label="Snehal logo">
+      <!-- wave logo -->
+      <svg width="56" height="56" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="168" height="168" rx="32" fill="#1DB954"/>
+        <path d="M40 60c30-12 60-10 90 4" stroke="#00110a" stroke-width="12" stroke-linecap="round" opacity="0.9"/>
+        <path d="M40 90c30-8 60-6 90 8" stroke="#00110a" stroke-width="12" stroke-linecap="round" opacity="0.75"/>
+        <path d="M40 120c30-6 60-4 90 10" stroke="#00110a" stroke-width="12" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+      <div>
+        <div class="brand-name">Snehal Rakas</div>
+        <div style="font-size:12px;color:#9b9b9b">AI/ML Engineer · Cloud</div>
+      </div>
+    </div>
+
+    <nav class="nav-links" aria-label="Main navigation">
+      <a id="navHome" data-action="home">Home</a>
+      <a id="navPlaylists" data-action="playlists">Playlists</a>
+      <a id="navAbout" data-action="about">About</a>
+      <a id="navCerts" data-action="certifications">Certifications</a>
+    </nav>
+
+    <div class="playlists">
+      <div style="font-size:12px;margin-bottom:8px;color:#9b9b9b">Playlists</div>
+      <div class="playlist-card" id="featuredPlaylist" role="button" tabindex="0">
+        <div class="playlist-art" aria-hidden="true">
+          <!-- wave playlist art -->
+          <svg width="64" height="64" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
+            <rect width="168" height="168" rx="28" fill="#0b0b0b"/>
+            <circle cx="84" cy="84" r="32" fill="#1DB954" />
+            <path d="M54 74c20-8 40-6 60 2" stroke="#00110a" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+            <path d="M54 94c20-6 40-4 60 6" stroke="#00110a" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="playlist-meta">
+          <h3>Featured Projects</h3>
+          <p>Microservices · Assistant · Testing · ML</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main" role="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:18px">
+        <div style="font-weight:700;color:#fff;font-size:18px" id="pageTitle">Home</div>
+        <div class="search" role="search" aria-label="Search projects">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" stroke="#9b9b9b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 21l-4.35-4.35" stroke="#9b9b9b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="searchInput" placeholder="Search projects, tech, repo..." aria-label="Search projects" />
+        </div>
+      </div>
+
+      <div class="profile" aria-hidden="false">
+        <!-- use optimized small avatar for topbar (fast) -->
+        <img id="profilePic" src="project_400.png"
+             srcset="project_400.png 400w, project_800.png 800w"
+             sizes="44px"
+             width="44" height="44"
+             loading="lazy" decoding="async"
+             alt="Snehal profile" onerror="this.onerror=null;this.src=FALLBACK_BASE64"/>
+        <div class="profile-actions">
+          <div style="font-weight:700">Snehal Rakas</div>
+          <div style="font-size:12px;color:#9b9b9b">AI/ML Engineer · Cloud Enthusiast</div>
+          <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:6px">
+            <a href="https://www.linkedin.com/in/snehal-rakas-752361250/" target="_blank" rel="noopener" style="color:#1DB954;text-decoration:none;font-weight:700">LinkedIn</a>
+            <a href="mailto:snehagjrakas118@gmail.com" style="color:#9b9b9b;text-decoration:none;font-size:13px">Email</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="content" id="contentArea">
+      <div class="left-col" aria-hidden="false">
+        <div style="background:linear-gradient(90deg,#0f0f0f,#0b0b0b);padding:16px;border-radius:12px">
+          <h2 style="color:#fff">Welcome 👋</h2>
+          <p style="color:#bdbdbd;margin-top:6px;font-size:14px">
+            Hi — I'm <strong>Snehal Rakas</strong>, an AI/ML Engineer and Cloud Enthusiast. Explore my projects like playlists — click any track to open the case panel.
+          </p>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <a class="btn" href="mailto:snehagjrakas118@gmail.com">Email</a>
+            <a class="btn outline" href="#" id="downloadResume">Download Resume</a>
+          </div>
+        </div>
+
+        <div style="background:#0b0b0b;padding:12px;border-radius:12px">
+          <h4 style="color:#fff;margin-bottom:10px">Top skills</h4>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span class="badge">Python</span>
+            <span class="badge">Node.js</span>
+            <span class="badge">Docker</span>
+            <span class="badge">Kubernetes</span>
+            <span class="badge">AWS</span>
+            <span class="badge">NLP</span>
+            <span class="badge">Selenium</span>
+            <span class="badge">ML</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-col" aria-live="polite" id="mainRight">
+        <div class="tracks-header">
+          <div>
+            <div style="font-size:13px;color:#9b9b9b">Playlist</div>
+            <h2 style="color:#fff">Featured Projects</h2>
+            <div style="color:#9b9b9b;margin-top:6px">Click a project to view details. Layout inspired by a music player.</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn" id="openAll">Open First Project</button>
+            <a class="btn outline" href="https://github.com/Snehalgjrakas2027" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+
+        <div class="track-list" id="trackList" role="list"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- overlay used for both project and certificate preview -->
+<aside id="overlay" aria-hidden="true" aria-label="Details panel">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div style="font-size:12px;color:#9b9b9b">Now Viewing</div>
+      <h3 id="ovTitle" style="margin-top:6px;color:#fff">Item</h3>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn outline" id="closeOverlayBtn">Close</button>
+    </div>
+  </div>
+
+  <div id="ovCover" style="margin-top:12px;height:320px;border-radius:8px;overflow:hidden;background:#0b0b0b"></div>
+
+  <div>
+    <p id="ovShort" style="color:#d6d6d6"></p>
+    <div id="ovTech" class="tech-badges" style="margin-top:8px"></div>
+
+    <div class="actions" style="margin-top:12px;display:flex;gap:8px">
+      <a id="openAction" class="btn outline" href="#" target="_blank" rel="noopener">Open</a>
+      <button id="downloadAction" class="btn" style="display:none">Download</button>
+    </div>
+
+    <div id="ovLong" style="margin-top:14px;color:#bdbdbd"></div>
+  </div>
+</aside>
+
+<!-- Now bar -->
+<div class="nowbar" role="status" aria-live="polite">
+  <div class="now-cover" id="nowCover"></div>
+  <div class="now-meta">
+    <h5 id="nowTitle">No project selected</h5>
+    <p id="nowSubtitle">Open a project to preview</p>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn outline" id="nowRepo">Repo</button>
+    <button class="btn" id="nowOpen">Open</button>
+  </div>
+</div>
+
+<script>
+/* ---------- fallback base64 for profile if images missing ---------- */
+const FALLBACK_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABYUlEQVR4nO3aMQ7CMAwF0D3/0y3QfQ2kqFqgk9uJY3p9Zxg59cE9m3gQAAAAAAAAAAAAAAwBv5J8n9nqfI+g2z3fYbJt9vI9u5h3d5z6d2m8gq9v2r8m8q7q7r3bXw7Yf0e7u7m9w9v1kOD9w+q6f1vL2f7n6b+tf3v1+8d3v0O5g3kEwAAAAAAAAAAAIDf8T9x9wXbQZzvQ8gEAAAAAAAAAABg9wEAAAAAAAAAAMgEAAAAAAAAAANgEAAAAAAAAAABgG4H8AjfJ5Jm6hN4AAAAASUVORK5CYII=";
+
+/* ---------- data ---------- */
+/* projects */
+const projects = [
+  { id:"microship", title:"microship", short:"Microservices architecture with User & Product services, Docker, CI/CD and monitoring.", long:`microship demonstrates a microservices architecture with two services: User Service and Product Service. Each service is a Node.js Express app exposing REST APIs. The project includes CI/CD pipeline setup, containerization with Docker, and monitoring using Prometheus and Grafana.`, tech:["Node.js","Express","Docker","Prometheus","Grafana","CI/CD"], repo:"https://github.com/Snehalgjrakas2027/microship" },
+  { id:"nova", title:"NOVA (Virtual Desktop Assistant)", short:"macOS virtual assistant with NLP, STT/TTS, automation and image generation.", long:`NOVA is a highly capable virtual assistant built to run on macOS, leveraging subprocess and various integrated tools for system control, automation, speech-to-text, text-to-speech, image generation, and real-time search.`, tech:["Python","NLP","TTS/STT","Automation","macOS"], repo:"https://github.com/Snehalgjrakas2027/NOVA-AI" },
+  { id:"selenium-testing", title:"WebPage Selenium Testing", short:"Python + Selenium tests to automate and validate webpage behavior.", long:`This repository contains Python code that uses Selenium WebDriver to perform automated testing on a webpage. The objective is to automate interaction with a webpage, check for various elements, and verify if they behave as expected.`, tech:["Python","Selenium","WebDriver","Testing","Automation"], repo:"https://github.com/Snehalgjrakas2027/WebPage-Selenium-Testing" },
+  { id:"customer-churn", title:"Customer Churn Analysis", short:"Data cleaning, feature engineering and predictive modeling for churn.", long:`Customer churn analysis project analyzes churn behavior and builds predictive models to identify customers at risk of leaving. It includes data cleaning, exploratory analysis, feature engineering, modeling, and evaluation using telecom dataset.`, tech:["Python","Pandas","Scikit-learn","EDA","Modeling"], repo:"https://github.com/Snehalgjrakas2027/customer-churn-analysis" },
+  { id:"macos-health", title:"macOS System Health Monitor", short:"Real-time macOS metrics capture, expose to Prometheus and visualize via Grafana.", long:`A modular, real-time system health monitoring solution for macOS, built with Python, Flask, Prometheus, and Grafana. Captures CPU, memory, disk, battery, and network metrics, enabling proactive alerts and diagnostics.`, tech:["Python","Flask","Prometheus","Grafana","Monitoring"], repo:"https://github.com/Snehalgjrakas2027/macos-system-health-monitor" }
+];
+
+/* certificates (image fields reference the thumbnails you downloaded) */
+const certificates = [
+  { id:"aws-cloud-practitioner", title:"AWS Cloud Practitioner Certificate", issuer:"Coursera / AWS", issued:"Nov 06, 2024", description:"AWS Cloud Practitioner Essentials — foundational cloud knowledge and AWS core services.", image:"aws_thumb.png", download:"SnehalRakas_DS AWS CERTIFICATE.pdf" },
+  { id:"juniper-cloud-associate", title:"Juniper Cloud Associate Certification", issuer:"Juniper / Internship", issued:"Jun 2025", description:"Networking Cloud Virtual Internship supported by Juniper (cloud & automation academy).", image:"juniper_thumb.png", download:"SNEHAL  RAKAS Juniper.pdf" },
+  { id:"zscaler-zero-trust", title:"ZScaler Zero Trust Security Certificate", issuer:"Zscaler / Internship", issued:"Dec 2024", description:"Zero Trust Cloud Security training and hands-on internship modules.", image:"zscaler_thumb.png", download:"SNEHALRAKAS_DS_ciscoZScalar certificate.pdf" },
+  { id:"cybersecurity-coursera", title:"Cybersecurity Certificate", issuer:"Cisco Networking Academy", issued:"May 25, 2025", description:"Introduction to Cybersecurity — fundamentals of threats, protections and best practices.", image:"cyber_thumb.png", download:"SnehalRakas_DS_Cybersecurity.pdf" },
+  { id:"ethical-hacker", title:"Ethical Hacker Certificate", issuer:"Cisco Networking Academy", issued:"Nov 04, 2025", description:"Ethical Hacking course — penetration testing basics, vulnerability scanning and pentest workflow.", image:"ethical_thumb.png", download:"SnehalRakas_DS_EthicalHacker.pdf" }
+];
+
+/* ---------- small helpers ---------- */
+function escURL(p){ return encodeURI(p).replace(/#/g,'%23'); }
+function waveThumb(){ return `<svg width="64" height="64" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg"><rect width="168" height="168" rx="28" fill="#0b0b0b"/><circle cx="84" cy="84" r="32" fill="#1DB954" /><path d="M54 74c20-8 40-6 60 2" stroke="#00110a" stroke-width="8" stroke-linecap="round" opacity="0.9"/><path d="M54 94c20-6 40-4 60 6" stroke="#00110a" stroke-width="8" stroke-linecap="round" opacity="0.7"/></svg>`; }
+
+/* ---------- render project tracks ---------- */
+function renderTracks(containerId='trackList'){
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  container.innerHTML = '';
+  projects.forEach((p,i)=>{
+    const el = document.createElement('div');
+    el.className = 'track';
+    el.tabIndex = 0;
+    el.innerHTML = `
+      <div class="idx">${i+1}</div>
+      <div class="thumb">${waveThumb()}</div>
+      <div class="meta">
+        <h4>${p.title}</h4>
+        <p>${p.short}</p>
+        <div class="tech-badges">${p.tech.slice(0,4).map(t=>`<span class="badge">${t}</span>`).join('')}</div>
+      </div>
+      <div style="width:120px;text-align:right;color:#9b9b9b;font-size:13px">Repo</div>
+    `;
+    el.addEventListener('click', ()=> openProject(p));
+    el.addEventListener('keydown', (e)=> { if(e.key==='Enter') openProject(p); });
+    container.appendChild(el);
+  });
+}
+
+/* ---------- overlay / project preview ---------- */
+const overlay = document.getElementById('overlay');
+const ovTitle = document.getElementById('ovTitle');
+const ovShort = document.getElementById('ovShort');
+const ovLong = document.getElementById('ovLong');
+const ovTech = document.getElementById('ovTech');
+const ovCover = document.getElementById('ovCover');
+const openAction = document.getElementById('openAction');
+const downloadAction = document.getElementById('downloadAction');
+
+function openProject(p){
+  ovTitle.textContent = p.title;
+  ovShort.textContent = p.short;
+  ovLong.textContent = p.long;
+  ovTech.innerHTML = p.tech.map(t=>`<span class="badge">${t}</span>`).join('');
+  ovCover.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#0b0b0b;border-radius:8px">${waveThumb()}</div>`;
+  openAction.href = escURL(p.repo);
+  openAction.textContent = 'Open Repo';
+  openAction.style.display = 'inline-block';
+  downloadAction.style.display = 'none';
+  overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
+}
+
+document.getElementById('closeOverlayBtn').addEventListener('click', ()=>{ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); });
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); } });
+
+/* ---------- certificates preview / download ---------- */
+function openCertificate(c){
+  ovTitle.textContent = c.title;
+  ovShort.textContent = `${c.issuer} · ${c.issued}`;
+  ovLong.textContent = c.description || '';
+  ovTech.innerHTML = '';
+  const href = escURL(c.download);
+  // embed PDF for preview
+  ovCover.innerHTML = `<iframe src="${href}" style="width:100%;height:100%;border:0;border-radius:8px"></iframe>`;
+  openAction.href = href; openAction.textContent = 'Open PDF'; openAction.style.display = 'inline-block';
+  downloadAction.style.display = 'inline-block'; downloadAction.textContent = 'Download';
+  downloadAction.onclick = function(){
+    const a = document.createElement('a'); a.href = href; a.download = c.download.split('/').pop(); document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  };
+  overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
+}
+
+/* ---------- page views ---------- */
+function showHome(){
+  document.getElementById('pageTitle').textContent = 'Home';
+  const contentArea = document.getElementById('contentArea');
+  contentArea.innerHTML = `
+    <div class="left-col" aria-hidden="false">
+      <div style="background:linear-gradient(90deg,#0f0f0f,#0b0b0b);padding:16px;border-radius:12px">
+        <h2 style="color:#fff">Welcome 👋</h2>
+        <p style="color:#bdbdbd;margin-top:6px;font-size:14px">
+          Hi — I'm <strong>Snehal Rakas</strong>, an AI/ML Engineer and Cloud Enthusiast. Explore my projects like playlists — click any track to open the case panel.
+        </p>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <a class="btn" href="mailto:snehagjrakas118@gmail.com">Email</a>
+          <a class="btn outline" href="#" id="downloadResume">Download Resume</a>
+        </div>
+      </div>
+
+      <div style="background:#0b0b0b;padding:12px;border-radius:12px">
+        <h4 style="color:#fff;margin-bottom:10px">Top skills</h4>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <span class="badge">Python</span>
+          <span class="badge">Node.js</span>
+          <span class="badge">Docker</span>
+          <span class="badge">Kubernetes</span>
+          <span class="badge">AWS</span>
+          <span class="badge">NLP</span>
+          <span class="badge">Selenium</span>
+          <span class="badge">ML</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-col" aria-live="polite" id="mainRight">
+      <div class="tracks-header">
+        <div>
+          <div style="font-size:13px;color:#9b9b9b">Playlist</div>
+          <h2 style="color:#fff">Featured Projects</h2>
+          <div style="color:#9b9b9b;margin-top:6px">Click a project to view details. Layout inspired by a music player.</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn" id="openAll">Open First Project</button>
+          <a class="btn outline" href="https://github.com/Snehalgjrakas2027" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+
+      <div class="track-list" id="trackList" role="list"></div>
+    </div>
+  `;
+  renderTracks('trackList');
+  document.getElementById('openAll').addEventListener('click', ()=> openProject(projects[0]));
+  document.getElementById('downloadResume').addEventListener('click', (e)=>{ e.preventDefault(); const a=document.createElement('a'); a.href=escURL('Testing Role.pdf'); a.target='_blank'; document.body.appendChild(a); a.click(); document.body.removeChild(a); });
+  history.replaceState(null,'','#home');
+}
+
+function showAbout(){
+  document.getElementById('pageTitle').textContent = 'About';
+  const contentArea = document.getElementById('contentArea');
+
+  contentArea.innerHTML = `
+    <div style="width:100%">
+      <div class="artist-cover" id="artistCover" style="background-image: url('hero_banner.png');">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;width:100%">
+          <div style="color:#d6d6d6;z-index:2">
+            <div style="font-size:13px">Profile</div>
+            <h1 style="color:#fff;margin:6px 0">Snehal Rakas</h1>
+            <div style="color:#9b9b9b">AI/ML Engineer · Cloud Enthusiast</div>
+          </div>
+          <div style="display:flex;gap:8px;z-index:2">
+            <a class="btn outline" href="Testing Role.pdf" target="_blank" rel="noopener">Resume</a>
+            <a class="btn" href="https://www.linkedin.com/in/snehal-rakas-752361250/" target="_blank" rel="noopener">LinkedIn</a>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:28px;margin-top:18px;align-items:flex-start">
+        <div class="artist-photo" id="artistPhoto">
+          <!-- optimized avatar: uses srcset & sizes for responsive loading -->
+          <img id="artistImg"
+               src="project_800.png"
+               srcset="project_400.png 400w, project_800.png 800w"
+               sizes="(max-width:900px) 120px, 160px"
+               width="160" height="160"
+               loading="lazy" decoding="async"
+               alt="Snehal photo"
+               style="width:100%;height:100%;object-fit:cover;object-position:50% 35%;"
+               onerror="this.onerror=null;this.src=FALLBACK_BASE64"/>
+        </div>
+
+        <div style="flex:1;color:#dcdcdc">
+          <h2 style="margin-top:6px;margin-bottom:8px;color:#fff">About</h2>
+          <p>I’m Snehal Rakas — an AI/ML engineer with a strong interest in cloud-native systems. I build data-driven applications, automation tools, and microservices that solve real problems. I enjoy working on end-to-end systems, from data ingestion and modeling to deploying observability pipelines with Prometheus and Grafana.</p>
+
+          <p style="margin-top:12px">My projects include virtual assistants for macOS, microservices platforms with CI/CD, automated testing frameworks using Selenium, and machine-learning projects like churn prediction. I’m comfortable with Python, Node.js, Docker, Kubernetes, and cloud services.</p>
+
+          <div style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap">
+            <span class="badge">Python</span>
+            <span class="badge">Machine Learning</span>
+            <span class="badge">NLP</span>
+            <span class="badge">Docker</span>
+            <span class="badge">Kubernetes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  history.replaceState(null,'','#about');
+}
+
+/* ---------- Playlists page (projects-as-playlist) ---------- */
+function showPlaylists(){
+  document.getElementById('pageTitle').textContent = 'Playlists';
+  const contentArea = document.getElementById('contentArea');
+  contentArea.innerHTML = `
+    <div style="width:100%">
+      <div style="display:flex;align-items:center;gap:18px;">
+        <div style="width:140px;height:140px;border-radius:12px;background:#0b0b0b;display:flex;align-items:center;justify-content:center">${waveThumb()}</div>
+        <div>
+          <div style="font-size:13px;color:#9b9b9b">Playlist</div>
+          <h1 style="color:#fff;margin-top:6px">Favorite Projects</h1>
+          <div style="color:#bdbdbd;margin-top:6px">This playlist contains my featured projects — click any item to open the case panel.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:18px">
+        <div class="track-list" id="playlistTracks"></div>
+      </div>
+    </div>
+  `;
+  const list = document.getElementById('playlistTracks');
+  projects.forEach((p,i)=>{
+    const el = document.createElement('div');
+    el.className = 'track';
+    el.tabIndex = 0;
+    el.innerHTML = `
+      <div class="idx">${i+1}</div>
+      <div class="thumb">${waveThumb()}</div>
+      <div class="meta">
+        <h4 style="color:#fff">${p.title}</h4>
+        <p style="color:#bdbdbd">${p.short}</p>
+        <div class="tech-badges">${p.tech.slice(0,4).map(t=>`<span class="badge">${t}</span>`).join('')}</div>
+      </div>
+      <div style="width:140px;text-align:right"><button class="btn outline" data-repo="${p.repo}">Repo</button></div>
+    `;
+    el.addEventListener('click', ()=> openProject(p));
+    const repoBtn = el.querySelector('button');
+    if(repoBtn) repoBtn.addEventListener('click',(e)=>{ e.stopPropagation(); window.open(p.repo,'_blank'); });
+    list.appendChild(el);
+  });
+  history.replaceState(null,'','#playlists');
+}
+
+/* ---------- Certifications page ---------- */
+function showCertifications(){
+  document.getElementById('pageTitle').textContent = 'Certifications';
+  const contentArea = document.getElementById('contentArea');
+  contentArea.innerHTML = `
+    <div style="width:100%">
+      <div class="cert-hero">
+        <div style="flex:1">
+          <div style="font-size:13px;color:#d7f0e0">Certifications</div>
+          <h1 style="font-size:36px;margin-top:6px">Verified certificates & badges</h1>
+          <div style="color:#e2efe7;margin-top:8px;max-width:720px">Below are certificates I've earned — click View to preview or Download to save the PDF.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:18px">
+        <div style="font-weight:700;color:#fff;margin-bottom:12px">My Certificates</div>
+        <div class="cert-grid" id="certGrid"></div>
+      </div>
+    </div>
+  `;
+  const grid = document.getElementById('certGrid');
+  certificates.forEach((c)=>{
+    const card = document.createElement('div');
+    card.className = 'cert-card-large';
+    card.innerHTML = `
+      ${c.image ? `<img src="${c.image}" alt="${c.title} thumbnail" onerror="this.onerror=null;this.src='${FALLBACK_BASE64}'"/>` : `<div style="width:100%;height:140px;border-radius:8px;background:#111;display:flex;align-items:center;justify-content:center">${waveThumb()}</div>`}
+      <div class="meta">
+        <b>${c.title}</b>
+        <span>${c.issuer} · ${c.issued}</span>
+        <div style="color:#bdbdbd;margin-top:8px;font-size:13px">${c.description || ''}</div>
+        <div class="cert-actions">
+          ${c.download ? `<button class="btn view-cert" data-id="${c.id}">View</button>` : ''}
+          ${c.download ? `<button class="btn outline download-cert" data-id="${c.id}">Download</button>` : ''}
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('.view-cert').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const id = e.currentTarget.dataset.id;
+      const c = certificates.find(x=>x.id===id);
+      if(c) openCertificate(c);
+    });
+  });
+  grid.querySelectorAll('.download-cert').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const id = e.currentTarget.dataset.id;
+      const c = certificates.find(x=>x.id===id);
+      if(!c) return;
+      const href = escURL(c.download);
+      const a = document.createElement('a'); a.href = href; a.download = c.download.split('/').pop(); document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    });
+  });
+
+  history.replaceState(null,'','#certifications');
+}
+
+/* ---------- nav bindings ---------- */
+document.getElementById('navHome').addEventListener('click',(e)=>{ e.preventDefault(); showHome(); });
+document.getElementById('navAbout').addEventListener('click',(e)=>{ e.preventDefault(); showAbout(); });
+document.getElementById('navCerts').addEventListener('click',(e)=>{ e.preventDefault(); showCertifications(); });
+document.getElementById('navPlaylists').addEventListener('click',(e)=>{ e.preventDefault(); showPlaylists(); });
+
+/* ---------- initial render ---------- */
+window.addEventListener('load', ()=>{
+  // initial view
+  if(location.hash === '#about') showAbout();
+  else if(location.hash === '#certifications') showCertifications();
+  else if(location.hash === '#playlists') showPlaylists();
+  else showHome();
+});
+
+/* ---------- search simple filter ---------- */
+document.getElementById('searchInput').addEventListener('input',(e)=>{
+  const q = e.target.value.toLowerCase().trim();
+  document.querySelectorAll('.track').forEach(t=>{
+    const txt = t.textContent.toLowerCase();
+    t.style.display = txt.includes(q) ? 'flex' : 'none';
+  });
+});
+
+/* ---------- Now bar placeholders ---------- */
+document.getElementById('nowRepo').addEventListener('click', ()=>{ if(projects[0]) window.open(projects[0].repo,'_blank'); });
+document.getElementById('nowOpen').addEventListener('click', ()=> openProject(projects[0]));
+
+</script>
+</body>
+</html>
